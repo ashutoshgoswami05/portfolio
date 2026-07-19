@@ -1,7 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+
+/** SSR-safe media-query hook backed by useSyncExternalStore. */
+function useMediaQuery(query: string) {
+  const subscribe = useCallback(
+    (callback: () => void) => {
+      const mql = window.matchMedia(query);
+      mql.addEventListener("change", callback);
+      return () => mql.removeEventListener("change", callback);
+    },
+    [query],
+  );
+  const getSnapshot = () => window.matchMedia(query).matches;
+  const getServerSnapshot = () => false;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
 
 /**
  * Traceable mouse cursor:
@@ -14,8 +29,9 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
  * cursor. Honours prefers-reduced-motion by dropping the trailing followers.
  */
 export default function CustomCursor() {
-  const [enabled, setEnabled] = useState(false);
-  const [reduced, setReduced] = useState(false);
+  const enabled = useMediaQuery("(pointer: fine)");
+  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
+
   const [hovering, setHovering] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [hidden, setHidden] = useState(true);
@@ -29,38 +45,19 @@ export default function CustomCursor() {
   const ringY = useSpring(y, { stiffness: 220, damping: 24, mass: 0.6 });
 
   // Comet trail: progressively laggier springs.
-  const trail = [
-    useSpring(x, { stiffness: 120, damping: 18, mass: 0.9 }),
-    useSpring(y, { stiffness: 120, damping: 18, mass: 0.9 }),
-    useSpring(x, { stiffness: 80, damping: 16, mass: 1.1 }),
-    useSpring(y, { stiffness: 80, damping: 16, mass: 1.1 }),
-    useSpring(x, { stiffness: 55, damping: 15, mass: 1.3 }),
-    useSpring(y, { stiffness: 55, damping: 15, mass: 1.3 }),
-  ];
+  const t1x = useSpring(x, { stiffness: 120, damping: 18, mass: 0.9 });
+  const t1y = useSpring(y, { stiffness: 120, damping: 18, mass: 0.9 });
+  const t2x = useSpring(x, { stiffness: 80, damping: 16, mass: 1.1 });
+  const t2y = useSpring(y, { stiffness: 80, damping: 16, mass: 1.1 });
+  const t3x = useSpring(x, { stiffness: 55, damping: 15, mass: 1.3 });
+  const t3y = useSpring(y, { stiffness: 55, damping: 15, mass: 1.3 });
   const trailPoints = [
-    { x: trail[0], y: trail[1], size: 5, opacity: 0.35 },
-    { x: trail[2], y: trail[3], size: 4, opacity: 0.22 },
-    { x: trail[4], y: trail[5], size: 3, opacity: 0.12 },
+    { x: t1x, y: t1y, size: 5, opacity: 0.35 },
+    { x: t2x, y: t2y, size: 4, opacity: 0.22 },
+    { x: t3x, y: t3y, size: 3, opacity: 0.12 },
   ];
 
   const raf = useRef<number | null>(null);
-
-  useEffect(() => {
-    const fine = window.matchMedia("(pointer: fine)");
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setEnabled(fine.matches);
-    setReduced(motionQuery.matches);
-
-    const onFineChange = (e: MediaQueryListEvent) => setEnabled(e.matches);
-    const onMotionChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    fine.addEventListener("change", onFineChange);
-    motionQuery.addEventListener("change", onMotionChange);
-
-    return () => {
-      fine.removeEventListener("change", onFineChange);
-      motionQuery.removeEventListener("change", onMotionChange);
-    };
-  }, []);
 
   useEffect(() => {
     if (!enabled) {
@@ -74,7 +71,7 @@ export default function CustomCursor() {
       raf.current = requestAnimationFrame(() => {
         x.set(e.clientX);
         y.set(e.clientY);
-        if (hidden) setHidden(false);
+        setHidden(false);
       });
     };
 
@@ -107,7 +104,7 @@ export default function CustomCursor() {
       document.removeEventListener("pointerenter", enter);
       if (raf.current) cancelAnimationFrame(raf.current);
     };
-  }, [enabled, hidden, x, y]);
+  }, [enabled, x, y]);
 
   if (!enabled) return null;
 
