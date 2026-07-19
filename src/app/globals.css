@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens — deep dark theme                                    */
+/* ------------------------------------------------------------------ */
+:root {
+  --bg: #07070b;
+  --bg-elevated: #0e0e16;
+  --surface: #12121c;
+  --border: #23233420;
+  --border-strong: #2a2a3d;
+
+  --fg: #e8e8f0;
+  --fg-muted: #9a9ab0;
+  --fg-subtle: #6a6a80;
+
+  --accent: #22d3ee; /* cyan */
+  --accent-2: #a78bfa; /* violet */
+  --accent-glow: #22d3ee33;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo,
+    monospace;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Subtle animated aurora backdrop */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60rem 60rem at 15% -10%, #22d3ee12, transparent 60%),
+    radial-gradient(50rem 50rem at 100% 10%, #a78bfa12, transparent 55%),
+    radial-gradient(40rem 40rem at 50% 120%, #22d3ee0d, transparent 60%);
+  pointer-events: none;
+}
+
+::selection {
+  background: var(--accent-glow);
+  color: #fff;
+}
+
+/* Thin custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a52;
+}
+
+/* Hide the native cursor only on devices with a fine pointer (mouse),
+   so the custom traceable cursor can take over. Touch devices keep native. */
+@media (pointer: fine) {
+  body.custom-cursor-active,
+  body.custom-cursor-active * {
+    cursor: none;
+  }
+}
+
+a,
+button {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
