@@ -11,6 +11,8 @@ type Rock = {
   vr: number;
   size: number;
   alpha: number;
+  strokeAlpha: number;
+  glow: boolean;
   color: string;
   verts: number[];
 };
@@ -46,32 +48,42 @@ export default function Asteroids() {
     const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
     const makeRocks = () => {
-      // Sparse: roughly one rock per ~110k px², clamped for very small/large screens.
+      // Roughly one rock per ~55k px², clamped for very small/large screens.
       const count = Math.min(
-        18,
-        Math.max(7, Math.round((width * height) / 110000)),
+        34,
+        Math.max(16, Math.round((width * height) / 55000)),
       );
       const palette = [
-        "185, 195, 215",
-        "185, 195, 215",
-        "185, 195, 215",
-        "160, 170, 195",
-        "34, 211, 238", // accent cyan (rare)
-        "167, 139, 250", // accent violet (rare)
+        "195, 205, 225",
+        "195, 205, 225",
+        "175, 186, 212",
+        "150, 162, 195",
+        "34, 211, 238", // accent cyan (occasional)
+        "167, 139, 250", // accent violet (occasional)
       ];
       rocks = Array.from({ length: count }, () => {
-        const vcount = Math.floor(rand(7, 10));
+        const vcount = Math.floor(rand(7, 11));
+        const colorIdx = Math.floor(Math.random() * palette.length);
+        const accent = colorIdx >= 4;
+        // depth: 0 = far (small, faint, slow) .. 1 = near (large, bright, fast).
+        const depth = Math.random();
+        const size = 2 + depth * 4.5; // ~2 .. 6.5
+        const alpha = 0.16 + depth * 0.32; // ~0.16 .. 0.48
+        const speed = 0.06 + depth * 0.2; // parallax drift
+        const angle = rand(0, Math.PI * 2);
         return {
           x: rand(0, width),
           y: rand(0, height),
-          vx: rand(-0.1, 0.1),
-          vy: rand(-0.1, 0.1),
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
           rot: rand(0, Math.PI * 2),
-          vr: rand(-0.0012, 0.0012),
-          size: rand(1.1, 3),
-          alpha: rand(0.04, 0.16),
-          color: palette[Math.floor(Math.random() * palette.length)],
-          verts: Array.from({ length: vcount }, () => rand(0.65, 1.25)),
+          vr: rand(-0.0018, 0.0018),
+          size,
+          alpha: accent ? alpha + 0.1 : alpha,
+          strokeAlpha: Math.min(0.6, alpha * 1.7),
+          glow: accent,
+          color: palette[colorIdx],
+          verts: Array.from({ length: vcount }, () => rand(0.62, 1.32)),
         };
       });
     };
@@ -103,8 +115,18 @@ export default function Asteroids() {
         else ctx.lineTo(px, py);
       }
       ctx.closePath();
+      // Soft glow for the occasional accent-tinted asteroid.
+      if (r.glow) {
+        ctx.shadowColor = `rgba(${r.color}, 0.55)`;
+        ctx.shadowBlur = r.size * 2.4;
+      }
       ctx.fillStyle = `rgba(${r.color}, ${r.alpha})`;
       ctx.fill();
+      // Crisp rim so the rocks read as defined shapes, not blurry blobs.
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 0.8;
+      ctx.strokeStyle = `rgba(${r.color}, ${r.strokeAlpha})`;
+      ctx.stroke();
       ctx.restore();
     };
 
