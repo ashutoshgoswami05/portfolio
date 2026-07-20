@@ -76,7 +76,7 @@ export const experiences: Experience[] = [
 export const skillGroups: SkillGroup[] = [
   {
     label: "Languages & Frameworks",
-    items: ["Java 17", "Python", "Spring Boot", "Spring Security", "SQL / PostgreSQL", "REST APIs"],
+    items: ["Java", "Python", "Spring Boot", "Spring Security", "SQL / PostgreSQL", "REST APIs"],
   },
   {
     label: "Cloud & DevOps",
