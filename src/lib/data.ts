@@ -103,6 +103,7 @@ export const projects: Project[] = [
     description:
       "Secure backend services in Java 17 and Spring Boot with JWT auth and RESTful APIs. Containerised with Docker and deployed to AWS Kubernetes (EKS), with Terraform provisioning VPC, IAM, load balancers and networking, and Helm managing releases.",
     tags: ["Java 17", "Spring Boot", "JWT", "Docker", "EKS", "Terraform", "Helm"],
+    href: "https://github.com/ashutoshgoswami05/booking",
   },
   {
     name: "Autonomous Financial Analyst Agent",
@@ -110,6 +111,7 @@ export const projects: Project[] = [
     description:
       "Automates equity research by combining financial metrics, market sentiment and earnings-call analysis into explainable investment recommendations. Built for retail investors, wealth managers and fintech teams to speed up consistent, data-driven decisions.",
     tags: ["Agentic AI", "LangGraph", "Python", "Tool Chaining"],
+    href: "https://github.com/ashutoshgoswami05/Mutli-Agent-Finance-Crew-AgenticAI",
   },
 ];
 

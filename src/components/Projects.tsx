@@ -11,8 +11,12 @@ export default function Projects() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {projects.map((project, pi) => (
-          <motion.article
+          <motion.a
             key={project.name}
+            href={project.href}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label={`${project.name} — view on GitHub`}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -61,7 +65,7 @@ export default function Projects() {
                 </span>
               ))}
             </div>
-          </motion.article>
+          </motion.a>
         ))}
       </div>
     </section>
