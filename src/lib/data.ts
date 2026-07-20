@@ -31,8 +31,7 @@ export const profile = {
   phone: "+4915566071249",
   socials: [
     { label: "Email", href: "mailto:ashutoshgoswami05@gmail.com" },
-    { label: "GitHub", href: "https://github.com/" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/" },
+    { label: "GitHub", href: "https://github.com/ashutoshgoswami05" },
   ],
 };
 
